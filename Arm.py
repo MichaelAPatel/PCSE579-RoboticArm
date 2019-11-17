@@ -32,7 +32,7 @@ start_time = time.time()
 #  in the max_time variable.
 
 angle = 'Insert Angle Here'
-armangle = angle - (numpy.pi / 2)
+armangle = angle + (numpy.pi / 2)
 
 max_time = 'Insert Time Here'
 
