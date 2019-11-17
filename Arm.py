@@ -23,9 +23,9 @@ def findGoalsFromStart(point1, point2, dt = .002):
     If there are no goal states return None
     """
     return None
-def dvSholder (T,arm, dt):
+def dvSholder (T, arm, dt):
     return 1
-def dvElbow (T,arm, dt):
+def dvElbow (T, arm, dt):
     return 1
 def dTh(angV, dt):
     return angV * dt
@@ -158,7 +158,7 @@ def main():
     if not goals:
         print("Ball. Does not reach the arms catch zone.")
         return None
-    answer = catchsolutionSearch(ArmStruct(), goals)
+    answer = catchsolutionSearch(ArmStruct(None, 0, 0), goals)
     if not answer:
         print("Strike. No catching motion was able to be identified.")
         return None
@@ -168,4 +168,3 @@ def main():
           "and is a position that can be aceived as early as:", catchstate.time)
 if __name__ == "__main__":
     main()
-solutionSearch(ArmStruct(), )
