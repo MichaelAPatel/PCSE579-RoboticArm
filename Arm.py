@@ -2,7 +2,6 @@ import numpy
 from matplotlib.pyplot import figure, plot, legend, xlabel, ylabel, show
 #from scipy.integrate import odeint
 from math import sin, cos, pi
-from busect import insort
 mass = 0.05
 radius = 0.6
 g = 9.81
@@ -11,6 +10,19 @@ armlink = .3
 forearmlink = .3
 catchrad = .075  #this should be the ball radius plus the hand radius or how far away the center of the hand needs to be from the center of the ball to catch it(.075 diameter of baseball placeholder)
 
+def findGoalsFromStart(point1, point2, dt = .002):
+    """
+    this function will return various points where the ball will be located inside of the reach of the arm. These points
+    should allow for overlapping of the ball from one point to the next but not so that they are overlapping a lot.
+    :param point1: this will be a tuple of the form (float, float) of the point at time t= -dt in radial coordinates with
+    the first float being the distance to the origin and the second float being the angle between the location of the
+    ball and 0 (with 0 being to the right)
+    :param point2: same as point 1 just at time t= 0
+    :return: this should return a list of tuples of the form (float, float, float) where the first float is the x
+    coordinate of a location along the ball path, the sencond is the y coordinate and the last is the time coordinate.
+    If there are no goal states return None
+    """
+    return None
 def dvSholder (T,arm, dt):
     return 1
 def dvElbow (T,arm, dt):
@@ -47,16 +59,17 @@ def genSuccessors(arm):
     successors that will have at leat one of the acuators at a torque of 5 or -5  and the other with 11 other torques making up to
     29 possibilities in total.
     :param arm: this is an arm stuct of an arm that is in the inital position
-    :return: a list of arm structs of possible successors after a timestep
+    :return: a tuple of arm structs of possible successors after a timestep
     """
     succlist = []
     for eT in range(-5,6,1):
         for sT in(-5,5):
-            succlist.append(ArmStruct(arm, sT,eT)
+            succlist.append(ArmStruct(arm, sT,eT))
+
     for sT in range(-4,5,1):
         for eT in (-5,5):
-            succlist.append(ArmStruct(arm, sT, eT)
-    return list(filter(lambda x: x.sholderV < 60*pi and x.elbowV < 60*pi, succlist)
+            succlist.append(ArmStruct(arm, sT, eT))
+    return tuple(filter(lambda x: x.sholderV < 60*pi and x.elbowV < 60*pi, succlist))
 
 def isGoal(handposition,goalstates):
     """
@@ -88,9 +101,9 @@ def heu(handposition,goalstates):
 def bisectInsert(item, sortedList, key = lambda x: x):
 
     """
-    this does in place insteriton of the item into the list to stay sorted
+    this does insteriton of the item into the list to stay sorted
     :param item: item to insert into list
-    :param inPlaceList: the list that will be inserted to
+    :param sortedList: the list that will be inserted to
     :param key: this decides what to consider while sorting the list
     :return: a sorted list with the new item inserted
     """
@@ -120,9 +133,10 @@ def solutionSearch(initialArm, goalstates):
             return thisState, thispath
         succs = genSuccessors(thisState)
         succs = [(heu(x), x, thispath+[x]) for x in succs]
-        succs = list(filter(labda x: x[0] != float("inf"), succs))
+        succs = list(filter(lambda x: x[0] != float("inf"), succs))
         for item in succs:
             fringe = bisectInsert(item, fringe, key= lambda x: x[0])
+    return None
 
 
 
@@ -133,14 +147,25 @@ def armmotion(vect, t):
     theta_ddot = (tau-(mass*g*radius*numpy.sin(theta))) / (i + pow(radius, 2))
     return [theta_dot, theta_ddot]
 
-
-t = numpy.linspace(0.0, 1.0, 101)
-initialcondition = [0.0, 0.0]
-solution = odeint(armmotion, initialcondition, t)
-
-figure()
-plot(t, solution*180/numpy.pi)
-legend(('θ', 'θdot'))
-xlabel('TIME (sec)')
-ylabel('θ(deg) and θdot (deg/sec)')
-show()
+def main():
+    while True:
+        point1 = [float(x) for x in input("Enter first point in radial coordinates:" ).split(" ")]
+        point2 = [float(x) for x in input("Enter second point in radial coordinates:").split(" ")]
+        if len(point1) == 2 and len(point2) == 2:
+            break
+        #print("Let's try this again you have to put in numeral numbers with or without a decimal")
+    goals = findGoalsFromStart(point1, point2)
+    if not goals:
+        print("Ball. Does not reach the arms catch zone.")
+        return None
+    answer = catchsolutionSearch(ArmStruct(), goals)
+    if not answer:
+        print("Strike. No catching motion was able to be identified.")
+        return None
+    catchstate, path = answer
+    print("Out, for some reason hitting the ball is an out here like we are feilding even thouhg the rest of it is like batting.")
+    print("the catch was done with arm postions ElbowTh:", catchstate.elbowTh, "SholderTh:", catchstate.sholderTh,
+          "and is a position that can be aceived as early as:", catchstate.time)
+if __name__ == "__main__":
+    main()
+solutionSearch(ArmStruct(), )
