@@ -21,9 +21,12 @@ def findGoalsFromStart(point1, point2, dt = .002):
     :param point2: same as point 1 just at time t= 0
     :return: this should return a list of tuples of the form (float, float, float) where the first float is the x
     coordinate of a location along the ball path, the sencond is the y coordinate and the last is the time coordinate.
-    If there are no goal states return None
+    If there are no goal states return an Empty list
     """
-    return None
+    goals = []
+    #########PUT CODE HERE###########
+
+    return goals
 
 
 def dvShoulderAndElbow (T, arm, dt):
@@ -54,10 +57,10 @@ class ArmStruct:
         if lastStruct:
             self.time = lastStruct.time + timestep
             self.shoulderTh = lastStruct.shoulderTh + dTh(lastStruct.shoulderV, timestep)
-            self.elbowTh   = lastStruct.shoulderTh + dTh(lastStruct.elbowV,   timestep)
+            self.elbowTh =    lastStruct.elbowTh +    dTh(lastStruct.elbowV,    timestep)
             sdV, edV = dvShoulderAndElbow((shoulderT, elbowT), arm, dt)
-            self.shoulderV= lastStruct.shoulderV + sdV
-            self.elbowV = lastStruct.elbowV + edV
+            self.shoulderV = lastStruct.shoulderV + sdV
+            self.elbowV =    lastStruct.elbowV    + edV
             self.shoulderT = shoulderT
             self.elbowT = elbowT
             self.handX = armlink * cos(self.shoulderTh) + forearmlink * cos(self.shoulderTh + self.elbowTh)
@@ -83,14 +86,14 @@ def genSuccessors(arm):
     :return: a tuple of arm structs of possible successors after a timestep
     """
     succlist = []
-    for eT in range(-5,6,1):
-        for sT in(-5,5):
+    for eT in range(-5, 6, 1):
+        for sT in(-5, 5):
             succlist.append(ArmStruct(arm, sT,eT))
-
-    for sT in range(-4,5,1):
-        for eT in (-5,5):
+    for sT in range(-4, 5, 1):
+        for eT in (-5, 5):
             succlist.append(ArmStruct(arm, sT, eT))
     return tuple(filter(lambda x: x.shoulderV < 60*pi and x.elbowV < 60*pi, succlist))
+
 
 def isGoal(handposition,goalstates):
     """
@@ -104,7 +107,9 @@ def isGoal(handposition,goalstates):
             if ((handposition[0] - goal[0])**2 + (handposition[1] - goal[1])**2)**0.5 < catchrad:
                 return True
     return False
-def heu(handposition,goalstates):
+
+
+def heu(handposition, goalstates):
     """
 
     :param handposition: this is a tuple of floats the (x,y, time) that describe the locaton of the hand in 2d*time space
@@ -114,12 +119,12 @@ def heu(handposition,goalstates):
     best = float("inf")
     for goal in goalstates:
         if handposition[2] < goal[2]:
-            best = min(best,(((handposition[0] - goal[0]) ** 2 + (handposition[1] - goal[1]) ** 2) ** 0.5) /(goal[2] - handposition[2]))
+            best = min(best, (((handposition[0] - goal[0]) ** 2 + (handposition[1] - goal[1]) ** 2) ** 0.5) /(goal[2] - handposition[2]))
 
     return best
 
 
-def bisectInsert(item, sortedList, key = lambda x: x):
+def bisectInsert(item, sortedList, key=lambda x: x):
 
     """
     this does insteriton of the item into the list to stay sorted
@@ -134,8 +139,8 @@ def bisectInsert(item, sortedList, key = lambda x: x):
         if low == high:
             return sortedList[:low]+[item]+ sortedList[high:]
         ndx = int((high - low)/2)+ low
-        if compare(item)> compare(sortedList[ndx]):
-            low = ndx +1
+        if key(item) > key(sortedList[ndx]):
+            low = ndx + 1
             continue
         high = ndx
 
@@ -147,7 +152,7 @@ def solutionSearch(initialArm, goalstates):
     :param goalstates:
     :return:
     """
-    fringe =[(0,initialArm,[])]
+    fringe = [(0, initialArm, [])]
     while fringe:
         _, thisState, thispath = fringe.pop()
         if isGoal((thisState.handX, thisState.handY, thisState.time), goalstates):
@@ -155,10 +160,11 @@ def solutionSearch(initialArm, goalstates):
         succs = genSuccessors(thisState)
         succs = [(heu(x), x, thispath+[x]) for x in succs]
         succs = list(filter(lambda x: x[0] != float("inf"), succs))
+        #########THIS IS WHAT WILL TAKE MOST OF THE TIME############
         for item in succs:
-            fringe = bisectInsert(item, fringe, key= lambda x: x[0])
+            fringe = bisectInsert(item, fringe, key=lambda x: x[0])
+        #########END################################################
     return None
-
 
 
 def armmotion(vect, t):
@@ -167,6 +173,7 @@ def armmotion(vect, t):
     tau = 5
     theta_ddot = (tau-(mass*g*radius*numpy.sin(theta))) / (i + pow(radius, 2))
     return [theta_dot, theta_ddot]
+
 
 def main():
     while True:
@@ -187,5 +194,7 @@ def main():
     print("Out, for some reason hitting the ball is an out here like we are feilding even thouhg the rest of it is like batting.")
     print("the catch was done with arm postions ElbowTh:", catchstate.elbowTh, "ShoulderTh:", catchstate.shoulderTh,
           "and is a position that can be aceived as early as:", catchstate.time)
+
+
 if __name__ == "__main__":
     main()
