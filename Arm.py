@@ -53,7 +53,7 @@ point1, point2 = trajectoryCalc(r1, theta1, r2, theta2)
 
 # TODO Check if point == None
 angle = numpy.arctan(point2[1] / point2[0])
-armangle = angle - (numpy.pi / 2)
+armangle = angle + (numpy.pi / 2)
 
 max_time = point2[2]
 
