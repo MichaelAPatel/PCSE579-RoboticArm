@@ -35,10 +35,17 @@ def armmotion(vect, t):
 
 
 # Data from the two snapshots where angles are in degrees (Change as needed)
+#Set 1
 r1 = 5.0
-theta1 = 221.62
-r2 = 3.8233
-theta2 = 219.14
+theta1 = 225.13
+r2 = 3.8075
+theta2 = 225.32
+
+#Set 2
+# r1 = 5.0
+# theta1 = 221.62
+# r2 = 3.8233
+# theta2 = 219.14
 
 # Start the calculation clock.
 start_time = time.time()
