@@ -10,6 +10,7 @@ armlink = .3
 forearmlink = .3
 catchrad = .075  #this should be the ball radius plus the hand radius or how far away the center of the hand needs to be from the center of the ball to catch it(.075 diameter of baseball placeholder)
 
+
 def findGoalsFromStart(point1, point2, dt = .002):
     """
     this function will return various points where the ball will be located inside of the reach of the arm. These points
@@ -23,25 +24,21 @@ def findGoalsFromStart(point1, point2, dt = .002):
     If there are no goal states return None
     """
     return None
-def dvShoulder (T, arm, dt):
+
+
+def dvShoulderAndElbow (T, arm, dt):
 
     """
     called when initalizing an Arm Struct used to find the new anglular velocity of the shoulder acuator
-    :param T: this is a float that represents the torque applied to the elbow acuator
+    :param T: a tuple of (float, float)  that represents the torque of the shoulder for [0] and elbow at [1]
     :param arm: this is a ArmStruct that represents the last position of the arm
     :param dt: this is a float that represents the time step that you have taken since your last known theta
-    :return: a float that represents the angualr velocity of the shoulder at the next time step
+    :return: a tuple of (float, float)  that represents the angualr velocity of the shoulder at the next time step for [0]
+    and elbow at [1]
     """
-    return 1
-def dvElbow (T, arm, dt):
-    """
-    called when initalizing an Arm Struct used to find the new anglular velocity of the elbow acuator
-    :param T: this is a float that represents the torque applied to the elbow acuator
-    :param arm: this is a ArmStruct that represents the last position of the arm
-    :param dt: this is a float that represents the time step that you have taken since your last known theta
-    :return: a float that represents the angualr velocity of the elbow at the next time step
-    """
-    return 1
+    return 1., 1.
+
+
 def dTh(angV, dt):
     """
     called when initalizing an Arm Struct used to find the new angle
@@ -50,14 +47,17 @@ def dTh(angV, dt):
     :return: the change in theta since your last timestep
     """
     return angV * dt
+
+
 class ArmStruct:
     def __init__(self, lastStruct, shoulderT, elbowT, timestep = .01):
         if lastStruct:
             self.time = lastStruct.time + timestep
             self.shoulderTh = lastStruct.shoulderTh + dTh(lastStruct.shoulderV, timestep)
             self.elbowTh   = lastStruct.shoulderTh + dTh(lastStruct.elbowV,   timestep)
-            self.shoulderV = lastStruct.shoulderV + dvShoulder(shoulderT, lastStruct, timestep)
-            self.elbowV = lastStruct.shoulderV + dvShoulder(shoulderT, lastStruct, timestep)
+            sdV, edV = dvShoulderAndElbow((shoulderT, elbowT), arm, dt)
+            self.shoulderV= lastStruct.shoulderV + sdV
+            self.elbowV = lastStruct.elbowV + edV
             self.shoulderT = shoulderT
             self.elbowT = elbowT
             self.handX = armlink * cos(self.shoulderTh) + forearmlink * cos(self.shoulderTh + self.elbowTh)
