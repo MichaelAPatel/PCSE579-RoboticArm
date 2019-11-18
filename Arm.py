@@ -177,11 +177,12 @@ def armmotion(vect, t):
 
 def main():
     while True:
-        point1 = [float(x) for x in input("Enter first point in radial coordinates:" ).split(" ")]
-        point2 = [float(x) for x in input("Enter second point in radial coordinates:").split(" ")]
-        if len(point1) == 2 and len(point2) == 2:
-            break
-        #print("Let's try this again you have to put in numeral numbers with or without a decimal")
+        try:
+            point1 = [float(x) for x in input("Enter first point in radial coordinates:" ).split(" ")]
+            point2 = [float(x) for x in input("Enter second point in radial coordinates:").split(" ")]
+            if len(point1) == 2 and len(point2) == 2:
+                break
+        except:print("Let's try this again you have to put in numeral numbers with or without a decimal")
     goals = findGoalsFromStart(point1, point2)
     if not goals:
         print("Ball. Does not reach the arms catch zone.")
