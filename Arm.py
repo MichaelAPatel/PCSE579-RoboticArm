@@ -23,34 +23,55 @@ def findGoalsFromStart(point1, point2, dt = .002):
     If there are no goal states return None
     """
     return None
-def dvSholder (T, arm, dt):
+def dvShoulder (T, arm, dt):
+
+    """
+    called when initalizing an Arm Struct used to find the new anglular velocity of the shoulder acuator
+    :param T: this is a float that represents the torque applied to the elbow acuator
+    :param arm: this is a ArmStruct that represents the last position of the arm
+    :param dt: this is a float that represents the time step that you have taken since your last known theta
+    :return: a float that represents the angualr velocity of the shoulder at the next time step
+    """
     return 1
 def dvElbow (T, arm, dt):
+    """
+    called when initalizing an Arm Struct used to find the new anglular velocity of the elbow acuator
+    :param T: this is a float that represents the torque applied to the elbow acuator
+    :param arm: this is a ArmStruct that represents the last position of the arm
+    :param dt: this is a float that represents the time step that you have taken since your last known theta
+    :return: a float that represents the angualr velocity of the elbow at the next time step
+    """
     return 1
 def dTh(angV, dt):
+    """
+    called when initalizing an Arm Struct used to find the new angle
+    :param angV: is a float that represents angular velocity of your system
+    :param dt: this is a float that represents the time step that you have taken since your last known theta
+    :return: the change in theta since your last timestep
+    """
     return angV * dt
 class ArmStruct:
-    def __init__(self, lastStruct, sholderT, elbowT, timestep = .01):
+    def __init__(self, lastStruct, shoulderT, elbowT, timestep = .01):
         if lastStruct:
             self.time = lastStruct.time + timestep
-            self.sholderTh = lastStruct.sholderTh + dTh(lastStruct.sholderV, timestep)
-            self.elbowTh   = lastStruct.sholderTh + dTh(lastStruct.elbowV,   timestep)
-            self.sholderV = lastStruct.sholderV + dvSholder(sholderT, lastStruct, timestep)
-            self.elbowV = lastStruct.sholderV + dvSholder(sholderT, lastStruct, timestep)
-            self.sholderT = sholderT
+            self.shoulderTh = lastStruct.shoulderTh + dTh(lastStruct.shoulderV, timestep)
+            self.elbowTh   = lastStruct.shoulderTh + dTh(lastStruct.elbowV,   timestep)
+            self.shoulderV = lastStruct.shoulderV + dvShoulder(shoulderT, lastStruct, timestep)
+            self.elbowV = lastStruct.shoulderV + dvShoulder(shoulderT, lastStruct, timestep)
+            self.shoulderT = shoulderT
             self.elbowT = elbowT
-            self.handX = armlink * cos(self.sholderTh) + forearmlink * cos(self.sholderTh + self.elbowTh)
-            self.handY = armlink * sin(self.sholderTh) + forearmlink * sin(self.sholderTh + self.elbowTh)
+            self.handX = armlink * cos(self.shoulderTh) + forearmlink * cos(self.shoulderTh + self.elbowTh)
+            self.handY = armlink * sin(self.shoulderTh) + forearmlink * sin(self.shoulderTh + self.elbowTh)
         else:
             self.time = 0
-            self.sholderTh = - pi/2
+            self.shoulderTh = - pi/2
             self.elbowTh = 0
-            self.sholderV = 0
+            self.shoulderV = 0
             self.elbowV = 0
-            self.sholderT = 0
+            self.shoulderT = 0
             self.elbowT = 0
-            self.handX = armlink * cos(self.sholderTh) + forearmlink * cos(self.sholderTh + self.elbowTh)
-            self.handY = armlink * sin(self.sholderTh) + forearmlink * sin(self.sholderTh + self.elbowTh)
+            self.handX = armlink * cos(self.shoulderTh) + forearmlink * cos(self.shoulderTh + self.elbowTh)
+            self.handY = armlink * sin(self.shoulderTh) + forearmlink * sin(self.shoulderTh + self.elbowTh)
 
 
 def genSuccessors(arm):
@@ -69,7 +90,7 @@ def genSuccessors(arm):
     for sT in range(-4,5,1):
         for eT in (-5,5):
             succlist.append(ArmStruct(arm, sT, eT))
-    return tuple(filter(lambda x: x.sholderV < 60*pi and x.elbowV < 60*pi, succlist))
+    return tuple(filter(lambda x: x.shoulderV < 60*pi and x.elbowV < 60*pi, succlist))
 
 def isGoal(handposition,goalstates):
     """
@@ -164,7 +185,7 @@ def main():
         return None
     catchstate, path = answer
     print("Out, for some reason hitting the ball is an out here like we are feilding even thouhg the rest of it is like batting.")
-    print("the catch was done with arm postions ElbowTh:", catchstate.elbowTh, "SholderTh:", catchstate.sholderTh,
+    print("the catch was done with arm postions ElbowTh:", catchstate.elbowTh, "ShoulderTh:", catchstate.shoulderTh,
           "and is a position that can be aceived as early as:", catchstate.time)
 if __name__ == "__main__":
     main()
