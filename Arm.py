@@ -30,22 +30,22 @@ def armmotion(vect, t):
     theta = vect[0]
     theta_dot = vect[1]
     tau = -5
-    theta_ddot = (tau - (mass * g * radius * numpy.sin(theta))) / (i + pow(radius, 2))
+    theta_ddot = (tau - (mass * g * radius * numpy.sin(theta))) / (i + mass * pow(radius, 2))
     return [theta_dot, theta_ddot]
 
 
 # Data from the two snapshots where angles are in degrees (Change as needed)
 #Set 1
-r1 = 5.0
-theta1 = 225.13
-r2 = 3.8075
-theta2 = 225.32
+# r1 = 5.0
+# theta1 = 225.13
+# r2 = 3.8075
+# theta2 = 225.32
 
 #Set 2
-# r1 = 5.0
-# theta1 = 221.62
-# r2 = 3.8233
-# theta2 = 219.14
+r1 = 5.0
+theta1 = 221.62
+r2 = 3.8233
+theta2 = 219.14
 
 # Start the calculation clock.
 start_time = time.time()
@@ -136,7 +136,7 @@ else:
 print('\n')
 print('Initial X Position: ' + str(x2))
 print('Initial Y Position: ' + str(y2))
-print('Calcuated X Velocity: ' + str(vx))
+print('Calculated X Velocity: ' + str(vx))
 print('Calculated Initial Y Velocity: ' + str(vy0))
 print('Angles of intersection:')
 for i in angleint:
