@@ -4,13 +4,14 @@ import sys
 import warnings
 from scipy.integrate import odeint
 from scipy.optimize import fsolve
+from matplotlib.pyplot import figure, plot, legend, xlabel, ylabel, show
 warnings.filterwarnings('error')
 
 # Define constants, note that moment of inertia will probably change.
-mass = 0.05
+mass = 0.03
 radius = 0.6
 g = 9.81
-i = 2.0
+i = 0.0036
 
 
 # Method to with equations that represent the balls trajectory and the catchable region. Used by FSolve to find
@@ -19,7 +20,7 @@ def paths(z, x0, y0, vx, vy0):
     x = z[0]
     y = z[1]
     f = numpy.zeros(2)
-    f[0] = pow(x, 2) + pow(y, 2) - radius
+    f[0] = pow(x, 2) + pow(y, 2) - pow(radius, 2)
     f[1] = y0 + vy0 * (x - x0) / vx - 4.905 * pow((x - x0) / vx, 2) - y
     return f
 
@@ -28,16 +29,16 @@ def paths(z, x0, y0, vx, vy0):
 def armmotion(vect, t):
     theta = vect[0]
     theta_dot = vect[1]
-    tau = 5
+    tau = -5
     theta_ddot = (tau - (mass * g * radius * numpy.sin(theta))) / (i + pow(radius, 2))
     return [theta_dot, theta_ddot]
 
 
 # Data from the two snapshots where angles are in degrees (Change as needed)
 r1 = 5.0
-theta1 = 15.8
-r2 = 3.0
-theta2 = 15.7
+theta1 = 221.62
+r2 = 3.8233
+theta2 = 219.14
 
 # Start the calculation clock.
 start_time = time.time()
@@ -70,7 +71,14 @@ for i in intersectionGuesses:
 
 # If there are no intersection points it is a ball and we can exit the program.
 if not xint:
+    stop_time = time.time()
     print('BALL!')
+    print('\n')
+    print('Initial X Position: ' + str(x2))
+    print('Initial Y Position: ' + str(y2))
+    print('Calcuated X Velocity: ' + str(vx))
+    print('Calculated Initial Y Velocity: ' + str(vy0))
+    print('Calculations completed in ' + str(stop_time - start_time) + 's.')
     sys.exit(0)
 
 # Calculate the time for each intersection point based upon the x velocity which is constant.
@@ -118,3 +126,26 @@ if total_time > max_time:
 else:
     print('OUT!')
 
+print('\n')
+print('Initial X Position: ' + str(x2))
+print('Initial Y Position: ' + str(y2))
+print('Calcuated X Velocity: ' + str(vx))
+print('Calculated Initial Y Velocity: ' + str(vy0))
+print('Angles of intersection:')
+for i in angleint:
+    print('    ' + str(i * 180 / numpy.pi))
+print('The program selected the angle ' + str(armangle * 180 / numpy.pi) + '. It must reach this angle in '
+      + str(max_time) + ' to catch the ball. The arm was only able to reach ' + str(solution[len(solution)-1][0] * 180
+      / numpy.pi) + '.')
+print('Calculations completed in ' + str(stop_time - start_time) + 's.')
+
+theta = []
+for i in solution:
+    theta.append(i[0]*180/numpy.pi)
+
+figure()
+plot(t, theta)
+legend(('θ'))
+xlabel('TIME (sec)')
+ylabel('θ(deg)')
+show()
