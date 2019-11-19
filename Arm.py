@@ -2,6 +2,7 @@ import numpy
 from matplotlib.pyplot import figure, plot, legend, xlabel, ylabel, show
 #from scipy.integrate import odeint
 from math import sin, cos, pi
+import time
 mass = 0.05
 radius = 0.6
 g = 9.81
@@ -134,15 +135,74 @@ def bisectInsert(item, sortedList, key=lambda x: x):
     :return: a sorted list with the new item inserted
     """
     low = 0
-    high = len(list)
+    high = len(sortedList)
     while True:
         if low == high:
-            return sortedList[:low]+[item]+ sortedList[high:]
-        ndx = int((high - low)/2)+ low
+            return sortedList[:low]+[item] + sortedList[high:]
+        ndx = int((high - low)/2) + low
         if key(item) > key(sortedList[ndx]):
             low = ndx + 1
             continue
         high = ndx
+
+
+def listInsert(small, sorted, key=lambda x: x):
+    """
+    this inserts a small list into a larger sorted list
+    :param small:
+    :param sorted:
+    :param key:
+    :return:
+    """
+    low = 0
+    high = len(sorted)
+    small.sort(key=key)
+    item = small[0]
+    insList = small[1:]
+    while low != high:
+        ndx = int((high - low)/2) + low
+        if key(item) > key(sorted[ndx]):
+            low = ndx + 1
+            continue
+        high = ndx
+    new = sorted[:low] + [item] + sorted[high:]
+    bot = low
+    high = len(new)
+    if not insList:
+        return new
+    item = insList[-1]
+    insList = insList[:-1]
+    while low != high:
+        ndx = int((high - low) / 2) + low
+        if key(item) > key(sorted[ndx]):
+            low = ndx + 1
+            continue
+        high = ndx
+    new = new[:low] + [item] + new[high:]
+    if not insList:
+        return new
+    top = high
+    fringe = [(insList, bot, top)]
+    while fringe:
+        insList, bot, top = fringe.pop()
+        #print(len(insList), insList)
+        low, high = bot, top
+        insNdx = int(len(insList)/ 2)
+        item = insList[insNdx]
+        while low != high:
+            ndx = int((high - low) / 2) + low
+            if key(item) > key(sorted[ndx]):
+                low = ndx + 1
+                continue
+            high = ndx
+        new = new[:low] + [item] + new[high:]
+        if insList[:insNdx]:
+            fringe.append((insList[:insNdx], bot, high))
+        if insList[insNdx+1:]:
+            fringe.append((insList[insNdx:], low, top))
+        #if len(insList) == 1:
+            #break
+    return new
 
 
 def solutionSearch(initialArm, goalstates):
@@ -182,7 +242,7 @@ def main():
             point2 = [float(x) for x in input("Enter second point in radial coordinates:").split(" ")]
             if len(point1) == 2 and len(point2) == 2:
                 break
-        except:print("Let's try this again you have to put in numeral numbers with or without a decimal")
+        except: print("Let's try this again you have to put in numeral numbers with or without a decimal")
     goals = findGoalsFromStart(point1, point2)
     if not goals:
         print("Ball. Does not reach the arms catch zone.")
@@ -198,4 +258,17 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    a = list(range(4000))
+    b = range(96)
+    b = [x * .223 + 2332.34 for x in b]
+    start = time.time()
+    for x in range(100):
+        for item in b:
+            fringe = bisectInsert(item, a)
+    print("peicewise:", time.time()-start)
+
+    start = time.time()
+    for x in range(100):
+        listInsert(b,a)
+    print("alltogether:", time.time()-start)
+    #main()
