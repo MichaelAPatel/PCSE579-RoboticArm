@@ -3,6 +3,7 @@ from matplotlib.pyplot import figure, plot, legend, xlabel, ylabel, show
 #from scipy.integrate import odeint
 from math import sin, cos, pi
 import time
+import random
 mass = 0.05
 radius = 0.6
 g = 9.81
@@ -146,7 +147,7 @@ def bisectInsert(item, sortedList, key=lambda x: x):
         high = ndx
 
 
-def listInsert(small, sorted, key=lambda x: x):
+def listInsert(small, sortedlist, key=lambda x: x):
     """
     this inserts a small list into a larger sorted list
     :param small:
@@ -155,18 +156,19 @@ def listInsert(small, sorted, key=lambda x: x):
     :return:
     """
     low = 0
-    high = len(sorted)
+    high = len(sortedlist)
     small.sort(key=key)
+    print(small[0],small[-1])
     item = small[0]
     insList = small[1:]
     while low != high:
         ndx = int((high - low)/2) + low
-        if key(item) > key(sorted[ndx]):
+        if key(item) > key(sortedlist[ndx]):
             low = ndx + 1
             continue
         high = ndx
-    new = sorted[:low] + [item] + sorted[high:]
-    bot = low
+    new = sortedlist[:low] + [item] + sortedlist[high:]
+    bot = low + 1
     high = len(new)
     if not insList:
         return new
@@ -174,24 +176,27 @@ def listInsert(small, sorted, key=lambda x: x):
     insList = insList[:-1]
     while low != high:
         ndx = int((high - low) / 2) + low
-        if key(item) > key(sorted[ndx]):
+        print(ndx,len(new) )
+        if key(item) > key(new[ndx]):
             low = ndx + 1
             continue
         high = ndx
     new = new[:low] + [item] + new[high:]
     if not insList:
         return new
-    top = high
+    top = high+1
     fringe = [(insList, bot, top)]
     while fringe:
         insList, bot, top = fringe.pop()
-        #print(len(insList), insList)
         low, high = bot, top
-        insNdx = int(len(insList)/ 2)
+        insNdx = int(len(insList)/2)
         item = insList[insNdx]
         while low != high:
+            #print(ndx, low, high)
+            if low>high:
+                raise TypeError
             ndx = int((high - low) / 2) + low
-            if key(item) > key(sorted[ndx]):
+            if key(item) > key(new[ndx]):
                 low = ndx + 1
                 continue
             high = ndx
@@ -202,6 +207,11 @@ def listInsert(small, sorted, key=lambda x: x):
             fringe.append((insList[insNdx:], low, top))
         #if len(insList) == 1:
             #break
+        print(insList, item, bot, top, insNdx, "\n", new, "\n\n")
+
+        if new != sorted(new):
+            print()
+            break
     return new
 
 
@@ -221,8 +231,8 @@ def solutionSearch(initialArm, goalstates):
         succs = [(heu(x), x, thispath+[x]) for x in succs]
         succs = list(filter(lambda x: x[0] != float("inf"), succs))
         #########THIS IS WHAT WILL TAKE MOST OF THE TIME############
-        for item in succs:
-            fringe = bisectInsert(item, fringe, key=lambda x: x[0])
+        fringe += succs
+        fringe.sort(key=lambda x: x[0])
         #########END################################################
     return None
 
@@ -258,17 +268,30 @@ def main():
 
 
 if __name__ == "__main__":
-    a = list(range(4000))
-    b = range(96)
-    b = [x * .223 + 2332.34 for x in b]
+    a = list(range(20000))
+    b = range(29)
+    b = [x * .523 + 12.34 for x in b]
+    randadd = [random.uniform(-4, 6) for x in range(300)]
+    fringe = a[:]
     start = time.time()
-    for x in range(100):
+    for i in range(300):
         for item in b:
-            fringe = bisectInsert(item, a)
+            fringe = bisectInsert(item + randadd[i], fringe)
     print("peicewise:", time.time()-start)
 
+    a = list(range(20000))
+    b = list(range(29))
+    b = [x * .523 + 12.34 for x in b]
+    randadd = [random.uniform(-4, 6) for x in range(300)]
+    fringe = a[:]
     start = time.time()
-    for x in range(100):
-        listInsert(b,a)
-    print("alltogether:", time.time()-start)
+    for i in range(300):
+        a += b
+        a.sort(reverse=True, key=lambda x: x)
+    print("sortfull:", time.time()-start)
+    start = time.time()
+    #insertlist = listInsert(b, a)
+    #print("alltogether:", time.time()-start)
+    #print(b, len(insertlist))
+    #print(sorted(insertlist) == insertlist, insertlist)
     #main()
